@@ -1,0 +1,146 @@
+\section{sed}
+\textit{Deriving from \say{line-editor} }\textbf{ed}\textit{, hence its similarities to }\textbf{vi}\textit{, which was influenced by the same.}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Invocation}
+\code{sed <option>* <script> <text\_file>}\\[1mm]
+\textit{To specify [multiple] ``instructions'' inline:}\\
+\code{sed `<instruct>' [-e `<instruct>']* <text\_file>}\\[1mm]
+\textit{Scripts combine instructions, each of the form:}\\
+\code{<address>?<cmd>/<text>} \quad \textit{\dots or, for \textbf{/s} cmd:}\\
+\code{<address>?s/<regex>/<substit\_str>/<flag>*}\\[1mm]
+\textit{The most common command-line options are:}\\
+\begin{tabular}{l l}
+    -e & editing instruction to follow \\
+    -f & script filename follows \\
+    -n & suppress automatic (every line) output \\
+\end{tabular} 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Syntax Examples}
+\entry{28mm}{\hl{\#} A comment}{comment}\\
+\entry{28mm}{s/\dots/a long\hl{\textbackslash}}{line \dots}\\
+\entry{28mm}{line, contin'd here}{\dots continuation}\\
+\entry{28mm}{s/into paren/(\hl{\&})/}{backref entire match}\\
+\code{s/\textbackslash (\textbackslash w\textbackslash w*\textbackslash ) (\textbackslash w\textbackslash w*\textbackslash ) (\textbackslash w\textbackslash w*\textbackslash ) /\hl{\textbackslash 3 \textbackslash 2 \textbackslash 1/}}\\
+\entry{20mm}{}{swap captured backreferences}\\
+\entry{28mm}{\hl{y/}abcdef/ABCDEF/}{transfm (capitalize)}\\
+\entry{28mm}{/<H[1-6]>/\{}{for html headers \dots}\\
+\entry{28mm}{\phantom{\quad}\hl{n}}{\dots admit \ul{n}ext line $\to$ PS}\\
+\entry{28mm}{\phantom{\quad}/\textasciicircum\$/d}{\dots and delete it if blank}\\
+\entry{28mm}{\}}{and done}\\
+\entry{28mm}{\$\hl{r} closing.txt}{\ul{r}ead in \& append closing}\\
+\entry{28mm}{/South\$\hl{/w} file}{$\equiv$ grep `/South\$/' > file}\\
+\entry{28mm}{100q}{print 100 lines \& \ul{q}uit}\\
+
+\textit{Note: }\textbf{a}, \textbf{i}, and \textbf{c}\textit{ require new text to be on a new line, started with a line-continuing backslash \textbackslash:}\\
+\entry{28mm}{/<Larry addr>\hl{/i\textbackslash}}{insert on \dots}\\
+\entry{28mm}{4700 Cross Court\textbackslash}{\dots multiple lines \dots }\\
+\entry{28mm}{French Lick, IN}{\dots and finishing here}\\
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Commands (aka \say{Procedure})}
+\textit{Each script line is an \say{instruction} containing only 1 \say{command}. Commands that admit only simple addresses (not ranges) are marked\textsuperscript{$\dagger$}:}\\
+\begin{tabular}{l l | l l}
+    s       & \ul{s}ubstit.     &
+    d       & \ul{d}elete           \\
+    a       & \ul{a}ppend\textsuperscript{$\dagger$}           &
+    i       & \ul{i}nsert\textsuperscript{$\dagger$}           \\
+    c       & \ul{c}hange           &
+    l       & \ul{l}ist (ascii)     \\
+    y       & transform              &
+    p       & \ul{p}rint            \\
+    =       & print line \#\textsuperscript{$\dagger$}   &
+    n       & \ul{n}ext line        \\
+    r $f$   & \ul{r}ead\textsuperscript{$\dagger$} file $f$                        &
+    w $f$   & \ul{w}rite file $f$   \\
+    q       & \ul{q}uit             &
+\end{tabular} \\
+
+\vspace{1mm}
+\textit{\say{Flags} for \ul{s}ubstitution command $\in$:}\\
+\begin{tabular}{l l}
+    <$n$> & replace $n$th occurrence ($n\in\mathbb{N}$) \\
+    g           & makes $\Delta$s \ul{g}lobally (on line) \\
+    p           & \ul{p}rint pattern-space contents \\
+    w <f>       & \ul{w}rite pattern-space to file $f$\\
+\end{tabular}
+
+
+\begin{comment}
+\begin{itemize}
+    \item <n> \quad replace only 
+    \item g \quad 
+    \item p \quad 
+    \item w <file> \quad 
+\end{itemize}
+\end{comment}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Addressing (aka \say{Pattern})}
+\textit{Every }\textbf{sed}\textit{ \say{instruction} starts with an \say{address,} (aka a \say{pattern}) indicating lines to which to apply the subsequent \say{command.} A missing address defaults to \say{all lines.} For the }\code{s/}\textit{ command, a missing `replace' regex defaults to the addressing regex. $\exists$ 3 means of addressing: a line number; a single regex; or a range of lines delimited by line \#s or regex's or a combination thereof.}\\
+%\textit{\ul{G}lobally $\Delta$ TX $\to$ Texas (\ul{s}ub) iff San Anto. $\in$ line:}\\
+%\entry{38mm}{\hl{/San Anton/}s/TX/Texas/g}{addr. is {\footnotesize San Anton}}\\
+\entry{20mm}{d}{no address: delete all lines!}\\
+\entry{20mm}{\hl{1}d}{delete 1st (\# indicated) line}\\
+\entry{20mm}{\hl{\$}d}{del last (special `\$' addr) line}\\
+\entry{20mm}{\hl{/\textasciicircum \$/}d}{del blank lines (addr is a regex)}\\
+\entry{20mm}{\hl{50,\$}d}{range: del past line 50}\\
+\entry{20mm}{\hl{1,/\textasciicircum\$/}d}{del to 1st empty (complex rng)}\\
+\entry{20mm}{/\textasciicircum \#/\hl{!}d}{! inverts \ul{preceding} address}\\[1mm]
+\textit{Use braces \{\} to nest (AND) addresses and / or to apply multiple commands to the same address:}\\
+\entry{27mm}{/<from>/,/<to>/\{}{top-level address range}\\
+\entry{25mm}{\phantom{\quad}<instructn>*}{each w/  its own [sub]addr}\\
+\entry{25mm}{\phantom{\quad}<instructn>*}{\dots and on its own line}\\
+\entry{25mm}{\}}{\} requires a separate line}\\
+
+%\entry{35mm}{}{}\\
+%\entry{35mm}{}{}\\
+%\entry{35mm}{}{}\\
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Design Principles \& Usage Patterns}
+
+
+\textit{$\exists$ various use-cases for }\textbf{sed}\textit{, including:
+\begin{itemize}[leftmargin=*,label=-]
+    \item Multiple edits to the same file
+    \item {[Search/replace]} $\Delta$s across a set of files
+    \item Extract relevant content from a file(s)
+    \item Manipulate a file for ephemeral use in a pipe
+\end{itemize} }
+\vspace{1mm}
+\textit{Text $\Delta$s can be difficult; helpful practices include:
+\begin{itemize}[leftmargin=*,label=-]
+    \item Start with checklist of desired changes, then write a script to make one \& repeat
+    \item Learn about your data, using \textbf{\code{grep}} first to see context in which target phrases appear
+    \item Longer regexs reduce matches: $\exists$ an implied \href{https://en.wikipedia.org/wiki/Precision\_and\_recall}{recall vs precision} tradeoff
+    \item Manually inspect $\Delta$s, \textbf{\code{diff}}ing input ag. out
+    \item Iteratively test ag ever larger sample text
+    \item It's also important that script doesn't work where you don't want it to
+\end{itemize}}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Pattern- and Hold- spaces}
+\textit{These are temporary buffers, used while processing a single line of input text. }\textbf{sed}\textit{ normally processes all script instructions for each line of text before proceeding to the next line of text. The \say{\ul{p}attern \ul{s}pace} stores the edited line as successive instructions change it; the \say{\ul{h}old \ul{s}pace} is for temporary storage. The following commands manipulate the PS, HS buffers or use those to maniuplate }{\bf sed}{\it 's control flow. Non-cap variants clobber exiting buffers; capitalized ones append only:}\\
+\begin{tabular}{l l | l l}
+    h	&	PS$\to$\ul{h}old-space		&
+    H	&	PS$\to$\ul{H}old-space		\\
+    g	&	\ul{g}et: HS$\to$PS		&
+    G	&	\ul{G}et: HS$\to$PS		\\
+    N	&	\ul{N}ext line $\to$ PS		&
+    D	&	\ul{D}el 1st PS line		\\
+    P	&	\ul{P}rint 1st PS line		&
+    x	&	e\ul{x}change HS, PS		\\
+    b	&	\ul{b}ranch to <lab>		&
+    t	& 	\ul{t}est to <lab>		\\
+\end{tabular}
+
+{\bf b}{\it\ and }{\bf t}{\it\ branch to the given \say{label} (defined by }\code{: my\_lab}{\it ), while keeping the current PS, HS; }{\bf t}{\it, conditionally upon success of previous }{\bf /s}{\it\ cmd.}
+

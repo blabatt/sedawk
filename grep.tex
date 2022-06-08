@@ -1,0 +1,18 @@
+\section{grep}
+
+\textit{Short for \say{\ul{g}lobal/\ul{r}eg\ul{e}x/\ul{p}rint} (a common sed command). Will print full line on match. \href{https://alvinalexander.com/unix/edu/examples/grep.shtml}{Examples}:}\\
+
+\code{grep <option>* ``<regex>'' [<file>|<dir>]}
+
+\entry{35mm}{grep blair /etc/passwd}{simple string search}\\
+\entry{35mm}{grep -i blair users.txt}{case \ul{i}nsensitive}\\
+\entry{35mm}{grep `[0-9][0-9][0-9]'  *}{3-digit regex}\\
+\entry{35mm}{grep -l `d3\textbackslash .' *.js}{print fi\ul{l}es, $\neg$ lines}\\
+\entry{35mm}{grep -n `pub' mycode.r}{line \ul{n}umbers}\\
+\entry{35mm}{grep -B5 -A5 `pub' *.r}{print lines \ul{b}ef, \ul{a}ft}\\
+\entry{35mm}{grep -v `bob' /etc/passwd}{lines $\neg\ni$ bob}\\
+\entry{35mm}{ls -al | grep `\textasciicircum d'}{pipe: prnt all dirs}\\
+\entry{35mm}{egrep `apple|orange' *}{extended regex}\\
+\entry{35mm}{grep -E `apple|orange' *}{ibid}\\
+\entry{35mm}{grep -rl `null' .}{\ul{r}ecursive fi\ul{l}e search}\\
+\entry{48mm}{find . -type f -exec grep -il `foo' \{\};}{find+grep} \\

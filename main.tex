@@ -1,0 +1,127 @@
+\documentclass[10pt,landscape]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage{tikz}
+\usetikzlibrary{shapes,positioning,arrows,fit,calc,graphs,graphs.standard}
+\usepackage[nosf]{kpfonts}
+\usepackage[t1]{sourcesanspro}
+%\usepackage[lf]{MyriadPro}
+%\usepackage[lf,minionint]{MinionPro}
+\usepackage{multicol}
+\usepackage{wrapfig}
+\usepackage[absolute,overlay]{textpos}
+\usepackage[top=4mm,bottom=7mm,left=5mm,right=5mm]{geometry}
+\usepackage[shortlabels]{enumitem}
+\usepackage[framemethod=tikz]{mdframed}
+\usepackage{microtype}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{dirtytalk}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{soul}
+\usepackage{comment}
+\usepackage{footmisc}
+
+\usepackage{graphicx}
+
+\let\bar\overline
+\newcommand{\Lim}[1]{\raisebox{0.5ex}{\scalebox{0.8}{$\displaystyle \lim_{#1}\;$}}}
+
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}%
+%\setlist[enumerate,1]{leftmargin=5mm}
+\setlist[itemize,1]{leftmargin=5mm}
+\setlist{nosep}
+\setuldepth{hi}
+
+
+\definecolor{myblue}{cmyk}{1,.72,0,.38}
+\definecolor{mygrey}{RGB}{54,71,76}
+\definecolor{vestablue}{HTML}{2B3F48}
+\definecolor{pastelred}{HTML}{fbb4ae}
+\definecolor{pastelblue}{HTML}{b3cde3}
+\definecolor{pastelgreen}{HTML}{ccebc5}
+\definecolor{pastelpurple}{HTML}{decbe4}
+\definecolor{pastelorange}{HTML}{fed9a6}
+\definecolor{pastelyellow}{HTML}{ffffcc}
+\definecolor{pastelbrown}{HTML}{e5d8bd}
+\definecolor{pastelpink}{HTML}{fddaec}
+\definecolor{pastelgrey}{HTML}{f2f2f2}
+\definecolor{forestgreen}{HTML}{228B22}
+
+\tikzset{filled/.style={fill=circle area, draw=circle edge, thick},
+    outline/.style={draw=circle edge, thick}}
+
+\pgfdeclarelayer{background}
+\pgfsetlayers{background,main}
+
+\everymath\expandafter{\the\everymath \color{myblue}}
+\everydisplay\expandafter{\the\everydisplay \color{myblue}}
+
+\renewcommand{\baselinestretch}{.8}
+\pagestyle{empty}
+
+\global\mdfdefinestyle{header}{%
+linecolor=gray,linewidth=1pt,%
+%leftmargin=1mm,rightmargin=2mm,skipbelow=2mm,skipabove=2mm,
+}
+
+\newcommand{\header}{
+\begin{mdframed}[]
+\footnotesize
+\sffamily
+\LARGE{\textbf{Grep, sed, awk}} \\
+\footnotesize ~page~\thepage~of~2
+\end{mdframed}
+}
+
+\newenvironment{code}
+    {
+    \fboxsep0pt
+    \colorbox{pastelgrey}}
+    {
+    }
+    
+ 
+\lstset{%
+  basicstyle=\small\ttfamily,
+  breaklines=false,
+  backgroundcolor = \color{pastelgrey},
+  language=[LaTeX]{TeX}
+}
+
+
+\newcommand{\entry}[3]{%%%
+    \begin{minipage}{{#1}}%%
+        \code{#2}%%%
+    \end{minipage}%%%
+    \# #3
+}%%%
+
+
+\makeatletter
+\renewcommand{\section}{\@startsection{section}{1}{0mm}%
+                                {1.8ex}%
+                                {.6ex}%x
+        {\color{myblue}\sffamily\Large\bfseries}}
+                                
+\renewcommand{\subsection}{\@startsection{subsection}{1}{0mm}%
+                                {1.2ex}%
+                                {.2ex}%x
+                                {\sffamily\bfseries}}
+
+
+\makeatother
+\setlength{\parindent}{0pt}
+
+\begin{document}
+% \small
+\begin{multicols*}{4}
+\header
+% \input{regex}
+\input{grep}
+\input{sed}
+\input{awk}
+
+\end{multicols*}
+\end{document}

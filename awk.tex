@@ -1,0 +1,293 @@
+\section{awk}
+
+\textit{Evolved out of grep, sed; both of which evolved out of line editor }\textbf{ed}\textit{.} 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Invocation}
+
+\code{awk `<instruction>*' files} \\
+\code{awk -f <script> <files>} \\
+\code{awk `<instruction>*' -}\\
+
+
+\textit{The most common options are:}\\
+\begin{tabular}{l l}
+    -f & script \ul{f}ilename to follow \\
+    -F & $\Delta$ed \ul{F}ield separator to follow \\
+    -v & \ul{v}ariable assignment follows \\
+\end{tabular}
+
+
+\textit{Example invocations:}\\
+\entry{37mm}{awk `\{ print \}' in.file}{print each line}\\
+\entry{37mm}{awk `\{ print \$1 \}' my.txt}{print all 1st fields}\\
+\entry{45mm}{awk -f myscript high=99 file}{setting vars}\\
+\entry{37mm}{awk -f script -f /dir/lib}{link a lib (2nd -f)}\\
+\entry{37mm}{shell> cat myscript}{script is all awk}\\
+\entry{37mm}{shell> \#!/usr/bin/awk \dots }{direct \say{shebang}}\\
+\entry{37mm}{shell> myscript.sh file.in}{invoke; pass args}\\
+\entry{37mm}{awk `\dots' \$*}{pass script params}\\
+
+\textit{Input from pipe using non-default separator:}\\
+\code{ls | awk \hl{-F``\textbackslash t''} `\{ print NR ``: '' \$1 \}'}\\
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Main Input Loop}
+\textit{Processing proceeds in a \say{main input loop,} which iterates over all lines in all input files, running the script against each line. Each script \say{instruction} is comprised of a pattern and block of actions:}\\
+
+\code{<pattern> \{ <action>* \}}\\
+
+\textit{Patterns can be regex or line numbers, eg:}\\
+\entry{40mm}{\hl{/\textasciicircum \$/} \{ print ``blank line!'' \}}{match regex}\\
+\entry{35mm}{\hl{NR == 1} \{ print \$0 \}}{conditional pattern}\\
+\entry{35mm}{\hl{BEGIN} \{ FS=``,'' \}}{special section}\\
+\entry{35mm}{\hl{\$5 \textasciitilde /TX/} \{ print \dots \}}{regex matches fld?}\\
+\entry{35mm}{\hl{\$5 \textasciitilde myvar} \{ print \dots \}}{ibid, using var}\\
+\entry{35mm}{\hl{\$5 !\textasciitilde /MA/} \{ print \dots \}}{ibid, negated}\\
+
+\textit{Each record is split into fields. While the main loop processes, variables }\textbf{NR}, \textbf{NF}, \textit{respectively contain index \ul{n}umber of the current \ul{r}ecord, and total \ul{n}umber of \ul{f}ields within this record. Eg, to count line number and swap first \& last fields:}\\
+\entry{35mm}{\{ print \hl{NR, NF, \$1} \}}{use of fields}\\
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Expressions}
+
+\textit{Arithmetic operators:}\\
+\begin{tabular}{l l l l l l l}
+    +	&
+    -	&
+    *	&
+    /	&
+    \%	&
+    \textasciitilde	&
+    **	\\
+\end{tabular}
+
+
+
+\textit{Assignment Operators:}\\
+\begin{tabular}{l l l l l}
+    ++	&
+    --	&
+    +=	&
+    -=	&
+    *=	\\
+    /=	&
+    \%=	&
+    \textasciitilde =	&
+    **=	&
+\end{tabular}
+
+
+
+\textit{Relational Operators:}\\
+\begin{tabular}{l l l l l l l l}
+  < 	&
+    >	&
+    <=	&
+    >=	&
+    ==	&
+    !=	&
+    \textasciitilde	&
+    !\textasciitilde	\\
+\end{tabular}
+
+
+
+\textit{Boolean Operators:}\\
+\begin{tabular}{l l l}
+    !!	&
+    \&\&	&
+    !	\\
+\end{tabular} \\
+\vspace{2mm}
+\entry{38mm}{/\textasciicircum\$/ \{ print x += 1 \}}{count lines}\\
+\entry{38mm}{NF == 6 \hl{\&\&} NR > 1 \{ \dots \}}{compound expr}\\
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Variables}
+
+\textit{Basic variable  assignment, manipulation:}\\
+\entry{35mm}{x = 1}{basic assignment}\\
+\entry{35mm}{z = ``Hello''}{strings}\\
+\entry{35mm}{y = x + 1}{math}\\
+\entry{35mm}{y += 1}{assign operator}\\
+
+\textit{System variables:}\\
+{\footnotesize \begin{tabular}{l l}
+    ARGC	& \# arguments on command line		\\
+    ARGV	& Array $\ni$ cmd line args		\\
+    CONVFMT	& String conversion formatter		\\
+    ENVIRON	& Array $\ni$ all env vars		\\
+    FILENAME	& Current filename			\\
+    FNR		& NR relative to current file		\\
+    NF		& \# fields in current record		\\
+    NR		& \# of the current record		\\
+    OFMT	& Output format for numbers		\\
+    OFS		& Output field separator		\\
+    ORS		& Output record separator		\\
+    RLENGTH	& Length of str from match()		\\
+    RS		& Record separator			\\
+    RSTART	& 1st pos from match()			\\
+    SUBSEP	& Separator char for array sub		\\
+\end{tabular}}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Types}
+
+% Strings
+\textit{Strings can contain the following escape sequences: }\textbf{\textbackslash a}, \textbf{\textbackslash b}, \textbf{\textbackslash f}, \textbf{\textbackslash n}, \textbf{\textbackslash r}, \textbf{\textbackslash t}, \textbf{\textbackslash v}, \textbf{\textbackslash <oct>}, \textbf{\textbackslash x<hex>}, \textbf{\textbackslash c}\\
+% Numerics
+% Arrays
+\textit{Arrays are associative; iterate/test with for/if-in.}\\
+
+
+
+\entry{35mm}{\{ print \hl{str1 ``: ''  str2} \}}{string concat}\\
+\entry{35mm}{grade[``blair'']=99}{array assignemnt}\\
+\entry{30mm}{split(\$1, name, `` '')}{1st field $\to$ name[]}\\
+\entry{35mm}{delete grade[``blair'']}{edit array}\\
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Flow Control}
+\textit{Syntax follows C's. Brackets \{ \} are required for multiple (\textbackslash n-separated) lines of statements. }\textbf{break}\textit{ and }\textbf{continue}\textit{ have normal meaning. }\textbf{next}\textit{ and }\textbf{exit}\textit{ goto next input line and exit the script.}\\
+% If statement
+\code{if(<cond>) \{ <statmt>* \}}\\
+% Ternary if
+\code{<expr> ? <statemt> : <statemt>}\\
+% While
+\code{while( <cond> ) \textbackslash n\ \ <statemt>*}\\
+% Until
+\code{do \textbackslash n <statmt>* \textbackslash n while( <cond> )}\\
+% For
+\code{for( <statmt>; <test>; <iterate>) \{ \dots \}}\\
+% For-in
+\code{for( <var> in <array>) \{ <statmt>* \}}\\[1mm]
+\textit{Minimum working flow-control examples:}\\
+\entry{35mm}{if(x==y) print x}{one-line if}\\
+\entry{35mm}{avg > 65 ? ``pass'' : ``fail''}{ternary}\\
+\entry{35mm}{while (i <= 4) \{ \dots \}}{line per statement}\\
+\entry{35mm}{do \{ \dots \} while (x<=4)}{line per statment}\\
+\entry{40mm}{for( i=1; i <= NF; i++) print \dots}{iterate flds}\\
+\entry{40mm}{for(itm in myarray) \dots}{iterate array}\\
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Functions}
+
+% Built-in
+% Library of functions
+\textit{Arithmetic functions:}\\
+\begin{tabular}{l l l l l}
+    cos		&
+    exp		&
+    int		&
+    log		&
+    sin		\\	
+    sqrt	&
+    atan2	&
+    rand	&
+    srand	&
+\end{tabular}\\
+\vspace{1mm} \\
+\textit{String functions:}\\
+\begin{tabular}{l l l l l}
+    gsub	&
+    index	&
+    length	&
+    split   &
+    sprintf \\
+    sub     &
+    substr	&
+    tolower	&
+    toupper	\\
+\end{tabular}
+\vspace{1mm} \\
+\textit{System functions:}\\
+\begin{tabular}{l l l l l}
+    getline	&	read from stdin (see sed version)	\\
+    system	&	execute system function			\\
+    close	&	close pipes or files script opened	\\
+    >\quad|	&	output to file or pipe 			\\
+\end{tabular} 
+\vspace{1mm} \\
+\textit{Create and call user-defined functions:}\\
+\entry{35mm}{function <str> ( <var>* ) \{}{name, params}\\
+\entry{35mm}{\phantom{\quad}<statmt>*}{newline separated}\\
+\entry{35mm}{\phantom{\quad}[return <var>]?}{optional return}\\
+\entry{35mm}{\}}{}\\
+\entry{35mm}{myfunc(\$1, 4, ``mystr'')}{call myfunc}\\
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\subsection*{System Interaction}
+
+% Pipes
+% File I/O
+% System calls
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Idioms}
+\textit{Parse data given in ``blocks'' (records in lines):}\\
+\code{BEGIN \{ FS = ``\textbackslash n''; RS = ``'' \}}\\[1mm]
+\textit{Report headers / footers using special sections:}\\
+\code{BEGIN \{ print ``Col 1'', ``\textbackslash t'', ``Col 2'' \} }\\
+\code{END \{ print ``Total: '', sum \} }\\[1mm]
+\textit{Dynamic variable binding by shell:}\\
+\code{awk `\{ \dots \} dir=\$(pwd) file1 \dots }\\[1mm]
+\textit{Confusing idiom, \$1's mean different things:}\\
+\code{shell> cat script}\\
+\code{shell> \#! /bin/bash}\\
+\code{shell> awk `\$1 == search' search=\$1 file}\\[20mm] %note: kludge!!
+
+%\begin{comment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{printf Formatting}
+
+\code{printf( <format> [, <argument>]* )}\\[1mm]
+% \textit{\dots where }\texttt{-}\textit{ indicates left justification, 1st }\texttt{0}\textit{ a ``zero-fill'' option; }\texttt{pre-decimal point digits a ``minimum width,'' digits following decimal for float-precision, and finally the mandatory }\texttt{<specifier>}\textit{ to indicate a type, $\in$:}\\
+\textit{Where }\texttt{<format>}\textit{ is a string containing arbitrary text, escaped special characters, and any number of }\texttt{<FS>}\textit{s (format specifier), each comprised as follows:}\\
+\code{<FS> := \%[-]?[0]?[0-9]*(.[0-9]*)?<spec>}\\
+\begin{tabular}{l l}
+    {[-]}?	&	left justify option		\\
+    {[0]}?	&	zero-fill option		\\
+    {[0-9]}*	&	minimum print width		\\
+    (.[0-9]*)?	&	decimal precision for floats	\\
+    <spec>	&	mandatory, see below:		\\
+\end{tabular}
+\begin{tabular}{l l | l l}
+    c	&	\ul{c}haracter		&	
+    d	& 	\ul{d}ecimal		\\
+    i	& 	\ul{i}nteger		&
+    e	&	float			\\
+    E	&	float			&
+    f	&	float			\\
+    g	& 	shortest of \textbf{e} or \textbf{f}	&
+    G	&	shortest of \textbf{E} or \textbf{F}	\\
+    o	&	unsigned octal		&
+    s	& 	\ul{s}tring			\\
+    u	&	\ul{u}nsigned decimal	&
+    x	&	lowercase he\ul{x}	\\
+    X	&	uppercase he\ul{X}	&
+    \%	&	literal \%		\\
+\end{tabular}
+\entry{35mm}{printf(``|\%10s|'')}{| { } { } hello|}\\
+\entry{35mm}{printf(``|\%-10s|'')}{|hello { } { } |}\\
+\entry{45mm}{printf(``\%d \%s \%d'', 7, ``ate'', 9)}{7 ate 9}\\
+\entry{35mm}{printf(``\%09.5f'', $\pi$)}{003.14159}\\
+\entry{35mm}{printf(``\%*.*g\textbackslash n'', 5, 3, var)}{dynamic format}\\
+%\end{comment}

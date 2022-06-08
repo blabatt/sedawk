@@ -1,0 +1,212 @@
+\section{Regular Expressions}
+
+\textit{Test out your regex \href{https://regex101.com/}{here}!}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Character Classes}
+
+\textit{Anything that is not a \say{literal} is a metacharacter.}
+\begin{tabular}{l  l}
+    .           & any single character \\
+    {[ \,\,\,\, ]}  & class of single characters \\
+    {[\textasciicircum \,\, ]}  & negated class \\
+    \textbackslash <char>   & escaped character \\
+\end{tabular} \\[1mm]
+\textit{{\color{red}Warning:} if a literal dash (-) is to appear in a CC, it must be the first character, eg }\code{[-\textbackslash w\textbackslash .]}\textit{ in order to disambiguate it from denoting a CC range.}\\[1mm]
+\textit{{\color{red}Warning:} Regex metacharacters are commonly confounded with the metacharacters of the encompassing language. The language may require escaping its special characters in the regex.}\\[1mm]
+\entry{35mm}{gr[ae]y}{\say{gray} or \say{grey}}\\
+\entry{35mm}{<H[1-6]>}{all html header tags}\\
+\entry{35mm}{[0-9a-fA-F]}{hex digits}\\
+\entry{35mm}{[\textasciicircum 1-6]}{not [1-6]}\\
+\entry{35mm}{06[-./]23[-./]81}{naive date match}\\
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Quantifiers}
+\textit{Count a number of matches (greedy by default):} \\
+\begin{tabular}{l  l}
+    ?  & optional single match \\
+    *  & any \# of matches, or none \\
+    +  & at least one match \\
+    \{\textit{\footnotesize min}, \textit{\footnotesize max}\}  & specified range of matches \\
+\end{tabular}
+
+\entry{30mm}{colou?r}{optional letter}\\
+\entry{30mm}{July 4(th)?}{quantifier grouping}\\
+%\entry{30mm}{[0-9]+}{arbitrary integer}\\
+\entry{30mm}{[a-zA-Z]\{1,5\}}{1-5 letter stock ticker}\\
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Positional Matches}
+\textit{PMs (aka \say{anchors} or \say{zero width assertions}) do not consume text, yielding only a text position.}\\
+\begin{tabular}{l  l}
+    \textasciicircum & match start of line \\
+    \$ & match at end of line \\
+    \textbackslash < & begin word boundary (egrep) \\
+    \textbackslash > & end word boundary (egrep) \\
+    \textbackslash b & begin / end word \ul{b}oundary (perl) \\
+\end{tabular}
+\entry{30mm}{\textasciicircum [0-9]+\$}{line has only digits}\\
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Groups, Alternation, \& Captures}
+\textit{\say{Groups} allow for \say{alternation}, and by default \say{capture} their content (NFAs only). This allows for \& \say{backreferencing} in supported languages.}\\
+\begin{tabular}{l  l}
+    |           & delimiter for alternatives \\
+    ( \,\, )    & various: scoping of alternatives; \\
+                & grouping for quantifiers; \\
+                & \& captures for backreferencing \\
+    (?: \,\, )    & non-captured grouping; \\
+        \textbackslash 1, \textbackslash 2  & backreference to prev. match
+\end{tabular}
+
+\entry{35mm}{Jeff(re|er)y}{name alternatives}\\
+\entry{47mm}{(1[012]|[1-9]):[0-5][0-9] (am|pm)}{12-hr time}\\
+\entry{35mm}{\textbackslash b ([A-Za-z]+)\, +\textbackslash 1\textbackslash b}{naive double word}\\[1mm]
+\textit{The last example \say{backreferences} a capture from within the regex; encapsulating languages have additional ways of referencing captures from outside the regex. Eg, perl uses }\code{\$1}, \code{\$2},\textit{ etc:}\\
+\entry{35mm}{s/\textbackslash .\textbackslash d\textbackslash d([0-9]?)\textbackslash d*/\$1/}{3-digit precision}\\[1mm]
+\textit{{\color{red}Warning:} for non-POSIX NFAs, alternation order affects what gets matched, eg:}\\
+{\footnotesize \code{(\textbackslash .\textbackslash d\textbackslash d[1-9] | \textbackslash .\textbackslash d\textbackslash d)\textbackslash d* }} $\color{red}\large\neq$ {\footnotesize \code{(\textbackslash .\textbackslash d\textbackslash d | \textbackslash .\textbackslash d\textbackslash d[1-9])\textbackslash d*}}\\
+\entry{43mm}{Jan (0?[1-9]|[12][0-9]|3[01]))}{{\color{red}error:} {\color{green}Jan 3}1}\\
+\entry{43mm}{Jan ([12][0-9]|3[01]|[0?[1-9]]))}{correct: {\color{green}Jan 31}}\\
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Character Class Shorthands}
+\textit{Shorthands for character classes (these are language dependent; influential perl dialect is shown):}\\
+\begin{tabular}{l  l  l  l}
+    \textbackslash s & white\ul{s}pace & \textbackslash S & !white\ul{s}pace \\
+    \textbackslash r    & carriage \ul{r}eturn  &
+    \textbackslash n    & \ul{n}ewline          \\
+    \textbackslash w    & \say{word} char       &
+    \textbackslash W    & !word                 \\
+    \textbackslash d    & [0-9] \say{digit}     &
+    \textbackslash D    & !digit                \\
+    \textbackslash t    & \ul{t}ab              
+\end{tabular}
+
+\entry{35mm}{\textbackslash \$ [0-9]+(\textbackslash . [0-9][0-9])?}{naive \$ amount}\\
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Lookarounds}
+\textit{These create positional matches, ie they do not \say{consume} the text that is matched. Rust \href{https://docs.rs/regex/1.4.3/regex/}{disallows} these in order to guarantee linear runtime.}\\
+\begin{tabular}{l  l}
+    (?<= \,\, )     &   positive lookbehind \\
+    (?<! \,\, )     &   negative lookbehind \\
+    (?= \,\, )      &   positive lookahead  \\
+    (?! \,\, )      &   negative lookahead  \\
+\end{tabular} \\[1mm]
+\entry{43mm}{s/(?<=\textbackslash d)(?=(\textbackslash d\textbackslash d\textbackslash d)+\$)/,/g}{$\mathbb{N}$ commas}\\
+[2mm]
+\textit{The following examples all add apostraphies to \textquotesingle Blairs\textquotesingle, with and without using lookarounds:}\\
+\entry{37mm}{s/\textbackslash bBlairs\textbackslash b/Blair\textquotesingle s/g}{verbatim sub}\\
+\entry{37mm}{s/\textbackslash b(Blair)(s)\textbackslash b/\$1\textquotesingle \$2/g}{consumes \textquotesingle Blairs\textquotesingle}\\
+\entry{37mm}{s/\textbackslash bBlair(?=s\textbackslash b)/Blair\textquotesingle/g}{LA: $\neg$consume \textquotesingle s\textquotesingle}\\
+\entry{37mm}{s/(?<=\textbackslash bBlair)(?=s\textbackslash b)/\textquotesingle/g}{uses LA, LB}\\
+\entry{37mm}{s/(?=s\textbackslash b)(?<=\textbackslash bBlair)/\textquotesingle/g}{$\equiv$ to the above}\\
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Operators}
+\textit{These describe the action that the encapsulating language will perform with regex matches.}\\
+\begin{tabular}{l  l  l  l}
+    m   &   \ul{m}atch              &
+    s   &   \ul{s}ubstitute         \\
+    \href{https://perldoc.perl.org/perlop\#Regexp-Quote-Like-Operators}{qr}  &   \href{https://perldoc.perl.org/perlop\#Regexp-Quote-Like-Operators}{$\to$ to regex obj}    &
+\end{tabular}
+
+\entry{35mm}{s/\textasciicircum \textbackslash s*\$/<p>/mg}{text \textparagraph\, $\to$ html <p>}\\
+
+\textit{Some languages, like \href{https://docs.rs/regex/1.4.3/regex/}{Rust}, do not feature prefix-denoted operators such as the above, instead requiring the invocation of functions:}
+
+\code{let re = Regex::new(r\textquotedbl\dots\textquotedbl).unwrap()}\\
+\entry{35mm}{let before = \textquotedbl\dots\textquotedbl}{bef, aft are strings}\\
+\code{let after = re.replace\_all(before, \textquotedbl \$m/\$d/\$y\textquotedbl);}\\
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Flags (aka \say{Modifiers})}
+\textit{Though not strictly part of a regular expression, they probably should be as they are used extensively to parameterize the way the engine operates, setting things like case-sensitivity of matching, etc.}
+\begin{tabular}{l  l  l  l}
+    i       & case \ul{i}nsens.             &
+    m       & \ul{m}ultiline                \\
+    s       & /./ matches \textbackslash n  &
+    u       & reverse: x* $\to$ *x          \\
+    U       & \ul{U}nicode                  &
+    x       & ignore whitespc               \\
+    g       & \ul{g}lobal
+\end{tabular}
+
+\vspace{2mm}
+\textit{Eg, match $\pm$ C\textdegree\, or F\textdegree, case-\ul{i}nsensitively:}\\
+\code{m/\textasciicircum ([-+]?[0-9]+(\textbackslash .[0-9]*)?) \textbackslash s*([CF])\$\hl{/i}}\\
+
+
+
+
+\begin{comment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Dump of Examples}
+
+\entry{35mm}{[a-zA-Z\_][a-zA-Z\_0-9]*]}{valid var. names}\\
+%\entry{35mm}{\textquotedbl [\textasciicircum \textquotedbl ]*\textquotedbl}{simple \textquotedbl \textquotedbl\, strings}\\
+\code{http://[-a-z0-9\_.:]+/[-a-z0-9\_:@\&?=+,.!/\textasciitilde *\%\$]*}\\
+\entry{35mm}{}{naive URL}\\
+\entry{35mm}{}{}\\
+\end{comment}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Idioms}
+
+\textit{The following are necessarily pseudo-code (min non-working examples); ellipses (\dots) elide portions of an RE not relevant to the idiom in question.}\\
+\entry{25mm}{[\textasciicircum\dots\$]}{whole line must match}\\
+\entry{25mm}{.*}{match anything ({\color{red}danger!})}\\
+\entry{25mm}{< ([\textasciicircum <>]*) >}{match \say{tags,} $\neg$ embedded}\\
+\entry{25mm}{\textbackslash ( ([\textasciicircum ()]*) \textbackslash )}{ibid, for parentheses}\\
+\entry{25mm}{s/\textasciicircum/\dots/}{insert @ begin line}\\
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Greedy, Lazy, \& Possessive Quantifiers}
+\textit{By default, quantifiers are \say{greedy}; they match as much as possible, only backtracking to smaller matched text subsets if the full regex later fails. \say{Lazy} quantifiers, in contrast, match as little as possible. Finally, \say{possessives,} once matched, disallow backtracking to prior states.}\\
+\begin{tabular}{c | c | c}
+    \ul{Greedy}  & \ul{Lazy (?)}       & \ul{Possessive (+)}       \\
+    *       & *?              & *+ \\
+    +       & +?              & ++ \\
+    ?       & ??              & ?+ \\
+    {\footnotesize \{\textit{min,max}\}} & {\footnotesize \{\textit{min,max}\}?}            & 
+    {\footnotesize \{\textit{min,max}\}+}            \\
+\end{tabular}
+
+\vspace{2mm}
+\entry{15mm}{\textquotedbl .*\textquotedbl}{greedy: aaa {\color{green}\textquotedbl bbb\textquotedbl\, ccc \textquotedbl ddd\textquotedbl} eee}\\
+\entry{15mm}{\textquotedbl .\hl{*?}\textquotedbl}{lazy: aaa {\color{green}\textquotedbl bbb\textquotedbl} ccc \textquotedbl ddd\textquotedbl\, eee}\\
+
+
+
+
+%\entry{}{}{}\\
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Atomic Grouping \quad \code{(?> \,\dots\, )}}
+\textit{Whereas possessive quantifiers disallow backtracking to all earlier states, atomic units only disallow saved states within the group\textquotesingle s confines.}\\[1mm]
+\textit{Both possessives and atomics manipulate an NFA\textquotesingle s saved states, and can achieve identical results:}\\
+\code{(\textbackslash .\textbackslash d\textbackslash d\hl{(?>}[1-9]?\hl{)})\textbackslash d+} $\color{green}\large{\Leftrightarrow}$
+\code{(\textbackslash .\textbackslash d\textbackslash d[1-9]\hl{?+})\textbackslash d+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Engine Theory}
+\textit{$\exists$ 2 types of engine: \ul{d}eterministic \& \ul{n}on-deterministic \ul{f}inite \ul{a}utomaton. POSIX stipulates \say{longest-leftmost matching}; a decree which all DFAs but only some NFAs satisfy. DFAs sacrifice lookarounds, captures, atomic units, and lazy quantifiers in order to gain performance. They increase it still further by \say{compiling} an \href{https://en.wikipedia.org/wiki/Abstract\_syntax\_tree}{AST-like} representation of a regex\textquotesingle s potential match-paths prior to an inquiry. NFAs use a depth-first approach, storing previously-seen, partially-matching \say{states} in a stack that it can \say{backtrack} to in order to try different alternative paths toward a potential match. Control of NFA operation-precedence can be achieved by tweaking submitted regexes, whereas DFAs\textquotesingle s breadth-first approach leaves no room for interpretation.}\\[1mm]
+\textit{Eg, }\code{[aa-a](b|b\{1\}|b)c}\textit{ vs }\code{abc}\textit{: indistinguishable to a DFA, but matched differently for an NFA.}
+
+
+
+
